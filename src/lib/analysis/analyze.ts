@@ -18,6 +18,7 @@ import {
   type Verdict,
 } from "./types";
 import { cumulative, maxDrawdown, mean, tStatistic, twoSidedP } from "./stats";
+import { buildAttribution } from "./attribution";
 
 const rTxt = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(3)}R`;
 
@@ -231,6 +232,7 @@ export function analyze(trades: Trade[]): Analysis {
 
   const checks = buildChecks(shared);
   const { verdict, tone, summary } = decideVerdict(shared);
+  const attribution = buildAttribution(trades, rSeries);
 
   return {
     verdict,
@@ -257,5 +259,6 @@ export function analyze(trades: Trade[]): Analysis {
     pValue,
     equityR,
     checks,
+    attribution,
   };
 }

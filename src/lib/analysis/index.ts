@@ -13,4 +13,6 @@ export type {
   CheckStatus,
   Verdict,
   Tone,
+  SegmentStat,
+  DimensionAttribution,
 } from "./types";

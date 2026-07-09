@@ -9,12 +9,18 @@ export type Trade = {
   r?: number;
   /** Epoch milliseconds, when a date/time column is present. */
   date?: number;
+  /** Instrument/symbol, when the log has one. Used for edge attribution. */
+  symbol?: string;
+  /** Trade direction, normalised to "Long" | "Short" when derivable. */
+  side?: string;
 };
 
 export type DetectedColumns = {
   pnl?: string;
   r?: string;
   date?: string;
+  symbol?: string;
+  side?: string;
 };
 
 export type ParseResult = {
@@ -82,6 +88,39 @@ export type Analysis = {
   /** Cumulative-R equity curve, one point per trade. */
   equityR: number[];
   checks: Check[];
+
+  /** Edge attribution: which slices of the log carry the result. Empty when the
+   * log has no dimensions to segment by. Descriptive, never causal. */
+  attribution: DimensionAttribution[];
+};
+
+/** One category within a dimension (e.g. the "EUR_USD" bucket of "Symbol"). */
+export type SegmentStat = {
+  label: string;
+  /** Number of trades in this segment. */
+  n: number;
+  /** Mean R within the segment. */
+  expectancyR: number;
+  /** 0..1 */
+  winRate: number;
+  /** Sum of R contributed by this segment (its share of the bottom line). */
+  totalR: number;
+  /** Share of all trades, 0..1. */
+  share: number;
+  /** True only when the segment is large enough AND separable from zero. */
+  robust: boolean;
+  /** "carrier" (robust + positive), "drag" (robust + negative), or "thin". */
+  role: "carrier" | "drag" | "thin";
+};
+
+/** All segments for one grouping dimension, plus an optional headline insight. */
+export type DimensionAttribution = {
+  key: string;
+  /** Human label, e.g. "Symbol", "Direction", "Day of week". */
+  label: string;
+  segments: SegmentStat[];
+  /** One-line takeaway when a single segment carries most of the result. */
+  insight?: string;
 };
 
 /** Minimum trades before any conclusion is honest. */
@@ -90,3 +129,7 @@ export const MIN_SAMPLE = 30;
 export const HEALTHY_SAMPLE = 200;
 /** Significance threshold for the two-sided test against zero. */
 export const ALPHA = 0.05;
+/** Below this many trades, a segment is "thin" and not to be trusted. */
+export const SEGMENT_MIN = 20;
+/** A dimension must label at least this share of trades to be shown. */
+export const SEGMENT_COVERAGE = 0.6;

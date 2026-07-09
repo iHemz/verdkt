@@ -48,6 +48,33 @@ const DATE_KEYS = [
   "opentime",
 ];
 
+// Optional dimensions used for edge attribution.
+const SYMBOL_KEYS = [
+  "symbol",
+  "pair",
+  "currencypair",
+  "instrument",
+  "ticker",
+  "market",
+  "asset",
+  "product",
+];
+
+// Direction is normalised by VALUE, so a column like "Type" that holds
+// "Entry long" / "Exit short" (TradingView) or "buy"/"sell" (MT) still works,
+// while an order-type column holding "Market"/"Limit" yields no direction.
+const SIDE_KEYS = ["side", "direction", "type", "action", "ordertype", "buysell", "longshort", "dir"];
+
+/** Map a raw cell to "Long" | "Short", or undefined when it isn't a direction. */
+function normalizeSide(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const s = raw.trim().toLowerCase();
+  if (!s) return undefined;
+  if (s === "b" || /\b(long|buy)\b/.test(s)) return "Long";
+  if (s === "s" || /\b(short|sell)\b/.test(s)) return "Short";
+  return undefined;
+}
+
 function pickColumn(normedHeaders: string[], keys: string[], exactOnly = false): number {
   for (const key of keys) {
     const idx = normedHeaders.indexOf(key);
@@ -90,6 +117,8 @@ export function parseTradeLog(text: string): ParseResult {
   const rIdx = pickColumn(normed, R_KEYS, true);
   const pnlIdx = pickColumn(normed, PNL_KEYS);
   const dateIdx = pickColumn(normed, DATE_KEYS);
+  const symbolIdx = pickColumn(normed, SYMBOL_KEYS);
+  const sideIdx = pickColumn(normed, SIDE_KEYS);
 
   if (pnlIdx === -1 && rIdx === -1) {
     throw new ParseError(
@@ -122,6 +151,16 @@ export function parseTradeLog(text: string): ParseResult {
       if (d !== undefined) trade.date = d;
     }
 
+    if (symbolIdx !== -1) {
+      const sym = (row[symbolIdx] ?? "").trim();
+      if (sym) trade.symbol = sym;
+    }
+
+    if (sideIdx !== -1) {
+      const side = normalizeSide(row[sideIdx]);
+      if (side) trade.side = side;
+    }
+
     trades.push(trade);
   }
 
@@ -145,6 +184,8 @@ export function parseTradeLog(text: string): ParseResult {
       pnl: pnlIdx !== -1 ? headers[pnlIdx] : undefined,
       r: rIdx !== -1 ? headers[rIdx] : undefined,
       date: dateIdx !== -1 ? headers[dateIdx] : undefined,
+      symbol: symbolIdx !== -1 ? headers[symbolIdx] : undefined,
+      side: sideIdx !== -1 ? headers[sideIdx] : undefined,
     },
     rowsSeen,
     rowsUsed: trades.length,

@@ -38,4 +38,10 @@ describe("VerdictCard", () => {
     render(<VerdictCard analysis={sampleAnalysis()} warnings={["heads up"]} />);
     expect(screen.getByText(/heads up/i)).toBeInTheDocument();
   });
+
+  it("renders the edge-attribution section for a log with dimensions", () => {
+    render(<VerdictCard analysis={sampleAnalysis()} />);
+    expect(screen.getByText("Where the edge lives")).toBeInTheDocument();
+    expect(screen.getByText("Symbol")).toBeInTheDocument();
+  });
 });

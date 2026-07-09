@@ -459,3 +459,131 @@ a {
 .vk-rise {
   animation: vk-rise 0.5s var(--ease) both;
 }
+
+/* ---------- edge attribution ---------- */
+.vk-attr {
+  padding: clamp(20px, 4vw, 36px);
+  border-top: 1px solid var(--line);
+}
+
+.vk-attr-sub {
+  color: var(--mute);
+  font-size: 13.5px;
+  max-width: 68ch;
+  margin: 8px 0 22px;
+}
+
+.vk-attr-dims {
+  display: grid;
+  gap: 26px;
+}
+
+.vk-attr-dim-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.vk-attr-dim-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+
+.vk-attr-insight {
+  font-size: 13px;
+  color: var(--glow);
+}
+
+.vk-attr-rows {
+  display: grid;
+  gap: 8px;
+}
+
+.vk-attr-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 1.4fr) 72px 84px minmax(60px, 2fr) 92px;
+  align-items: center;
+  gap: 12px;
+}
+
+.vk-attr-name {
+  font-size: 14px;
+  color: var(--bone);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vk-attr-exp {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: right;
+}
+
+.vk-attr-exp.pos {
+  color: var(--pass);
+}
+.vk-attr-exp.neg {
+  color: var(--fail);
+}
+
+.vk-attr-n {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--mute);
+  text-align: right;
+}
+
+.vk-attr-n-unit {
+  color: var(--faint);
+}
+
+.vk-attr-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ink-700);
+  overflow: hidden;
+}
+
+.vk-attr-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.vk-attr-chip {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.vk-attr-chip[data-role="carrier"] {
+  color: var(--pass);
+  border-color: var(--pass-soft);
+  background: var(--pass-soft);
+}
+.vk-attr-chip[data-role="drag"] {
+  color: var(--fail);
+  border-color: var(--fail-soft);
+  background: var(--fail-soft);
+}
+
+@media (max-width: 640px) {
+  .vk-attr-row {
+    grid-template-columns: minmax(80px, 1.4fr) 64px minmax(48px, 1.6fr) 78px;
+  }
+  .vk-attr-n {
+    display: none;
+  }
+}

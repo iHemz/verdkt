@@ -16,6 +16,7 @@ test.describe("Verdkt analyzer", () => {
     await expect(page.getByText("The five checks")).toBeVisible();
     await expect(page.getByText(/sign flip vs first half/i)).toBeVisible();
     await expect(page.getByRole("img", { name: /Cumulative R equity curve/i })).toBeVisible();
+    await expect(page.getByText("Where the edge lives")).toBeVisible();
   });
 
   test("returns to the dropzone via 'Analyse another log'", async ({ page }) => {

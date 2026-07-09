@@ -3,6 +3,7 @@ import { StatGrid } from "./StatGrid";
 import { EquityCurve } from "./EquityCurve";
 import { OutOfSampleSplit } from "./OutOfSampleSplit";
 import { CheckList } from "./CheckList";
+import { Attribution } from "./Attribution";
 
 type VerdictCardProps = {
   analysis: Analysis;
@@ -37,6 +38,8 @@ export function VerdictCard({ analysis: a, warnings = [] }: VerdictCardProps) {
 
         <div className="vk-section-label">The five checks</div>
         <CheckList checks={a.checks} />
+
+        <Attribution dimensions={a.attribution} />
       </section>
 
       {a.usingRProxy && (

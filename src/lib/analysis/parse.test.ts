@@ -58,3 +58,33 @@ describe("parseTradeLog — real-world formats", () => {
     expect(res.warnings.length).toBeGreaterThan(0);
   });
 });
+
+describe("parseTradeLog — attribution dimensions", () => {
+  it("extracts the symbol column", () => {
+    const res = parseTradeLog("Symbol,Profit\nEUR_USD,10\nGBP_USD,-5");
+    expect(res.columns.symbol).toBe("Symbol");
+    expect(res.trades.map((t) => t.symbol)).toEqual(["EUR_USD", "GBP_USD"]);
+  });
+
+  it("normalises a Side column to Long/Short", () => {
+    const res = parseTradeLog("Side,Profit\nBuy,10\nSell,-5\nlong,3");
+    expect(res.trades.map((t) => t.side)).toEqual(["Long", "Short", "Long"]);
+  });
+
+  it("derives direction by value from a TradingView-style Type column", () => {
+    const csv = "Type,Profit\nEntry long,\nExit long,120\nEntry short,\nExit short,-40";
+    const res = parseTradeLog(csv);
+    expect(res.trades.map((t) => t.side)).toEqual(["Long", "Short"]);
+  });
+
+  it("leaves side undefined for non-directional values (order type)", () => {
+    const res = parseTradeLog("Type,Profit\nMarket,10\nLimit,-5");
+    expect(res.trades.every((t) => t.side === undefined)).toBe(true);
+  });
+
+  it("leaves symbol/side undefined when the columns are absent", () => {
+    const res = parseTradeLog("Profit\n1\n2\n3");
+    expect(res.columns.symbol).toBeUndefined();
+    expect(res.columns.side).toBeUndefined();
+  });
+});
