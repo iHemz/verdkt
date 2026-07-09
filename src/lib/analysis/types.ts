@@ -85,6 +85,8 @@ export type Analysis = {
   tStat: number;
   pValue: number;
 
+  /** Per-trade R series, in trade order. Feeds the cost stress test. */
+  rSeries: number[];
   /** Cumulative-R equity curve, one point per trade. */
   equityR: number[];
   checks: Check[];
@@ -122,6 +124,25 @@ export type DimensionAttribution = {
   /** One-line takeaway when a single segment carries most of the result. */
   insight?: string;
 };
+
+/** The verdict re-run after charging a per-trade round-trip cost. */
+export type CostAdjusted = {
+  /** Cost in R charged to every trade, win or lose. */
+  costR: number;
+  expectancyR: number;
+  firstHalfR: number;
+  secondHalfR: number;
+  signFlip: boolean;
+  tStat: number;
+  pValue: number;
+  verdict: Verdict;
+  tone: Tone;
+  /** True when the strategy still clears the bar after costs. */
+  survives: boolean;
+};
+
+/** Round-trip cost presets (in R) offered in the stress test. */
+export const COST_PRESETS = [0, 0.05, 0.1, 0.2] as const;
 
 /** Minimum trades before any conclusion is honest. */
 export const MIN_SAMPLE = 30;

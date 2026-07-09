@@ -2,8 +2,9 @@
 // individual files, so internal reorganisation stays invisible to callers.
 
 export { parseTradeLog, ParseError } from "./parse";
-export { analyze } from "./analyze";
+export { analyze, stressCost } from "./analyze";
 export { sampleTradeLogCsv } from "./sample";
+export { COST_PRESETS } from "./types";
 export type {
   Trade,
   ParseResult,
@@ -15,4 +16,5 @@ export type {
   Tone,
   SegmentStat,
   DimensionAttribution,
+  CostAdjusted,
 } from "./types";

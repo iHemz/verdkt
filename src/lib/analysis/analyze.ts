@@ -13,6 +13,7 @@ import {
   type Analysis,
   type Check,
   type CheckStatus,
+  type CostAdjusted,
   type Tone,
   type Trade,
   type Verdict,
@@ -257,8 +258,40 @@ export function analyze(trades: Trade[]): Analysis {
     signFlip,
     tStat,
     pValue,
+    rSeries,
     equityR,
     checks,
     attribution,
   };
+}
+
+/**
+ * Re-run the verdict after charging a round-trip cost of `costR` to every trade
+ * (win or lose), the way real spread, commission and slippage actually bite.
+ * `rSeries` is the per-trade R series from analyze(). Pure and cheap, so the UI
+ * can call it on every slider tick.
+ */
+export function stressCost(rSeries: number[], costR: number): CostAdjusted {
+  const adj = rSeries.map((r) => r - costR);
+  const n = adj.length;
+  const expectancyR = mean(adj);
+  const mid = Math.floor(n / 2);
+  const firstHalfR = mean(adj.slice(0, mid));
+  const secondHalfR = mean(adj.slice(mid));
+  const signFlip =
+    Math.sign(firstHalfR) !== Math.sign(secondHalfR) && (firstHalfR !== 0 || secondHalfR !== 0);
+  const tStat = tStatistic(adj);
+  const pValue = twoSidedP(tStat);
+
+  const { verdict, tone } = decideVerdict({
+    n,
+    expectancyR,
+    firstHalfR,
+    secondHalfR,
+    signFlip,
+    pValue,
+  });
+  const survives = verdict === "EDGE HOLDS UP" || verdict === "PROMISING BUT THIN";
+
+  return { costR, expectancyR, firstHalfR, secondHalfR, signFlip, tStat, pValue, verdict, tone, survives };
 }

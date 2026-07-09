@@ -4,6 +4,7 @@ import { EquityCurve } from "./EquityCurve";
 import { OutOfSampleSplit } from "./OutOfSampleSplit";
 import { CheckList } from "./CheckList";
 import { Attribution } from "./Attribution";
+import { CostStress } from "./CostStress";
 
 type VerdictCardProps = {
   analysis: Analysis;
@@ -38,6 +39,8 @@ export function VerdictCard({ analysis: a, warnings = [] }: VerdictCardProps) {
 
         <div className="vk-section-label">The five checks</div>
         <CheckList checks={a.checks} />
+
+        <CostStress rSeries={a.rSeries} baseExpectancyR={a.expectancyR} />
 
         <Attribution dimensions={a.attribution} />
       </section>

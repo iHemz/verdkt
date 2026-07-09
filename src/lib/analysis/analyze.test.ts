@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "./analyze";
+import { analyze, stressCost } from "./analyze";
 import { parseTradeLog } from "./parse";
 import { sampleTradeLogCsv } from "./sample";
 import type { Trade } from "./types";
@@ -86,6 +86,35 @@ describe("analyze — invariants", () => {
     const payoff = a.checks.find((c) => c.key === "payoff");
     expect(a.winRate).toBeGreaterThan(0.55);
     expect(payoff?.status).toBe("fail");
+  });
+});
+
+describe("stressCost", () => {
+  const strong = repeat([0.9, 0.9, -1], 80); // 240 trades, mean +0.267, EDGE HOLDS UP
+
+  it("lowers expectancy by exactly the cost per trade", () => {
+    const base = analyze(rTrades(strong)).expectancyR;
+    expect(stressCost(strong, 0.1).expectancyR).toBeCloseTo(base - 0.1, 6);
+  });
+
+  it("reproduces the base verdict at zero cost", () => {
+    expect(stressCost(strong, 0).verdict).toBe("EDGE HOLDS UP");
+    expect(stressCost(strong, 0).survives).toBe(true);
+  });
+
+  it("a strong edge survives a small cost but dies under a large one", () => {
+    expect(stressCost(strong, 0.05).survives).toBe(true);
+    const heavy = stressCost(strong, 0.35); // pushes mean below zero
+    expect(heavy.expectancyR).toBeLessThan(0);
+    expect(heavy.verdict).toBe("NO EDGE");
+    expect(heavy.survives).toBe(false);
+  });
+
+  it("turns the marginal sample result negative once costs are charged", () => {
+    const { rSeries } = analyze(parseTradeLog(sampleTradeLogCsv()).trades);
+    expect(stressCost(rSeries, 0).expectancyR).toBeGreaterThan(0);
+    expect(stressCost(rSeries, 0.2).expectancyR).toBeLessThan(0);
+    expect(stressCost(rSeries, 0.2).verdict).toBe("NO EDGE");
   });
 });
 

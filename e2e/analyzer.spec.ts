@@ -19,6 +19,19 @@ test.describe("Verdkt analyzer", () => {
     await expect(page.getByText("Where the edge lives")).toBeVisible();
   });
 
+  test("cost stress test flips the marginal sample to NO EDGE", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /try a sample log/i }).click();
+
+    const cost = page.locator(".vk-cost");
+    await expect(cost.getByText("Does it survive real costs?")).toBeVisible();
+    await cost.getByRole("button", { name: "0.20R" }).click();
+
+    // +0.098R sample minus 0.20R cost => negative => NO EDGE
+    await expect(cost.getByText("NO EDGE")).toBeVisible();
+    await expect(cost.getByText(/does not survive/i)).toBeVisible();
+  });
+
   test("returns to the dropzone via 'Analyse another log'", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: /try a sample log/i }).click();
