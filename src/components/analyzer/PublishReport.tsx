@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import type { Trade } from "@/lib/analysis";
 import { publishFormSchema, type PublishFormValues } from "@/lib/reports/schema";
 import { usePublishReport } from "@/hooks/reports/usePublishReport";
@@ -12,6 +14,7 @@ const MIN_TO_PUBLISH = 30;
 
 export function PublishReport({ trades }: { trades: Trade[] }) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
   const publish = usePublishReport();
 
   const {
@@ -40,11 +43,13 @@ export function PublishReport({ trades }: { trades: Trade[] }) {
       {
         onSuccess: (data) => {
           if (data.mode === "checkout" && data.checkoutUrl) {
-            window.location.href = data.checkoutUrl;
+            // External redirect to Stripe Checkout; router can't route off-site.
+            window.location.assign(data.checkoutUrl);
             return;
           }
-          window.location.href = `/r/${data.id}?mt=${encodeURIComponent(data.manageToken)}`;
+          router.push(`/r/${data.id}?mt=${encodeURIComponent(data.manageToken)}`);
         },
+        onError: (err) => toast.error(err.message),
       },
     );
   });
@@ -90,8 +95,6 @@ export function PublishReport({ trades }: { trades: Trade[] }) {
           </span>
         </label>
         {errors.agreed && <span className="vk-field-error">{errors.agreed.message}</span>}
-
-        {publish.error && <div className="vk-error">{publish.error.message}</div>}
 
         <div className="vk-report-row">
           <Button type="submit" disabled={pending}>

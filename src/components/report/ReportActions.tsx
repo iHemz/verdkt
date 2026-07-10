@@ -1,37 +1,60 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import type { StoredReport } from "@/lib/reports";
+import { downloadReportPdf } from "@/lib/pdf/reportPdf";
 import { Button } from "@/components/ui/Button";
 import { useClipboard } from "@/hooks/useClipboard";
 import { useOrigin } from "@/hooks/useOrigin";
 import { useUnpublishReport } from "@/hooks/reports/useUnpublishReport";
 
-export function ReportActions({ id, manageToken }: { id: string; manageToken?: string }) {
+export function ReportActions({
+  report,
+  manageToken,
+}: {
+  report: StoredReport;
+  manageToken?: string;
+}) {
   const { copiedKey, copy } = useClipboard();
   const origin = useOrigin();
+  const router = useRouter();
   const unpublish = useUnpublishReport();
-  const [removed, setRemoved] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
 
+  const id = report.id;
   const reportUrl = `${origin}/r/${id}`;
   const badgeUrl = `${origin}/api/badge/${id}`;
   const embed = `<a href="${reportUrl}" target="_blank" rel="noopener"><img src="${badgeUrl}" alt="Verdkt Verified" height="30"></a>`;
 
-  function onUnpublish() {
-    if (!manageToken) return;
-    if (!confirm("Unpublish this report? The public link and badge will stop working.")) return;
-    unpublish.mutate(
-      { id, manageToken },
-      { onSuccess: (res) => res.removed && setRemoved(true) },
-    );
+  async function onDownloadPdf() {
+    setPdfBusy(true);
+    try {
+      await downloadReportPdf(report);
+    } catch {
+      toast.error("Couldn't generate the PDF. Please try again.");
+    } finally {
+      setPdfBusy(false);
+    }
   }
 
-  if (removed) {
-    return (
-      <div className="vk-report-actions">
-        <p className="vk-topbar-note">
-          This report has been unpublished. The link and badge are now inactive.
-        </p>
-      </div>
+  function onUnpublish() {
+    if (!manageToken) return;
+    unpublish.mutate(
+      { id, manageToken },
+      {
+        onSuccess: (res) => {
+          if (res.removed) {
+            toast.success("Report unpublished. The link and badge are now inactive.");
+            router.refresh(); // re-run the server component; the report is gone now
+          } else {
+            toast.error("Could not unpublish. Check that you have the owner link.");
+          }
+        },
+        onError: (err) => toast.error(err.message),
+      },
     );
   }
 
@@ -45,8 +68,8 @@ export function ReportActions({ id, manageToken }: { id: string; manageToken?: s
         <Button variant="ghost" onClick={() => copy("link", reportUrl)}>
           {copiedKey === "link" ? "Copied ✓" : "Copy report link"}
         </Button>
-        <Button variant="ghost" onClick={() => window.print()}>
-          Save as PDF
+        <Button variant="ghost" onClick={onDownloadPdf} disabled={pdfBusy}>
+          {pdfBusy ? "Preparing…" : "Download PDF"}
         </Button>
       </div>
 
@@ -77,14 +100,24 @@ export function ReportActions({ id, manageToken }: { id: string; manageToken?: s
             Keep this page&apos;s link private, it carries your manage token. Anyone with it can
             unpublish the report.
           </p>
-          {unpublish.error && (
-            <div className="vk-error" style={{ marginBottom: 10 }}>
-              {unpublish.error.message}
+          {!confirming ? (
+            <Button variant="ghost" onClick={() => setConfirming(true)}>
+              Unpublish report
+            </Button>
+          ) : (
+            <div className="vk-report-row">
+              <Button variant="ghost" onClick={onUnpublish} disabled={unpublish.isPending}>
+                {unpublish.isPending ? "Unpublishing…" : "Confirm unpublish"}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setConfirming(false)}
+                disabled={unpublish.isPending}
+              >
+                Cancel
+              </Button>
             </div>
           )}
-          <Button variant="ghost" onClick={onUnpublish} disabled={unpublish.isPending}>
-            {unpublish.isPending ? "Unpublishing…" : "Unpublish report"}
-          </Button>
         </div>
       )}
     </div>

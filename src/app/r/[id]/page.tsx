@@ -79,7 +79,7 @@ function ReportView({ report, manageToken }: { report: StoredReport; manageToken
       </section>
 
       <section className="vk-shell" style={{ paddingBottom: 72 }}>
-        <ReportActions id={report.id} manageToken={manageToken} />
+        <ReportActions report={report} manageToken={manageToken} />
       </section>
 
       <footer className="vk-foot">

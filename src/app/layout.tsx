@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Hanken_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 
 const instrument = Instrument_Serif({
@@ -39,6 +40,18 @@ export default function RootLayout({
     >
       <body>
         <QueryProvider>{children}</QueryProvider>
+        <Toaster
+          theme="dark"
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: "var(--ink-850)",
+              color: "var(--bone)",
+              border: "1px solid var(--line-strong)",
+              fontFamily: "var(--font-sans)",
+            },
+          }}
+        />
       </body>
     </html>
   );
