@@ -2,11 +2,10 @@
 // Marketplace). Activated automatically when UPSTASH_REDIS_REST_URL/TOKEN are
 // set — see getStore() in store.ts. Only imported when those env vars exist.
 
-import { Redis } from "@upstash/redis";
 import type { NewReport, ReportRecord, StoredReport } from "./types";
 import { newManageToken, newReportId } from "./id";
 import { sha256Hex, timingSafeEqual } from "./hash";
-import { redisCredentials } from "./config";
+import { getRedis } from "@/lib/redis";
 import type { ReportStore } from "./store";
 
 const key = (id: string) => `report:${id}`;
@@ -23,9 +22,8 @@ function toPublic(rec: ReportRecord): StoredReport {
 }
 
 export function redisStore(): ReportStore {
-  const creds = redisCredentials();
-  if (!creds) throw new Error("Redis is not configured.");
-  const redis = new Redis({ url: creds.url, token: creds.token });
+  const redis = getRedis();
+  if (!redis) throw new Error("Redis is not configured.");
 
   return {
     async create(input: NewReport, opts?: { paid?: boolean }) {

@@ -849,3 +849,55 @@ a {
     break-inside: avoid;
   }
 }
+
+/* ---------- developer docs ---------- */
+.vk-endpoint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--ink-900);
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--bone);
+  word-break: break-all;
+}
+
+.vk-endpoint-method {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--glow);
+  border: 1px solid var(--glow-soft);
+  background: var(--glow-soft);
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.vk-code {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--ink-900);
+  padding: 18px 20px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--bone-dim);
+}
+
+.vk-code code {
+  font-family: inherit;
+  white-space: pre;
+}
+
+.vk-inline {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  color: var(--glow);
+  background: var(--glow-soft);
+  border-radius: 5px;
+  padding: 1px 5px;
+}

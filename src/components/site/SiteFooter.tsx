@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const ESSAY_URL =
   "https://williamsab.dev/writing/how-to-build-a-backtest-that-can-prove-you-wrong";
 
@@ -8,6 +10,11 @@ export function SiteFooter() {
         className="vk-shell"
         style={{ paddingTop: 28, paddingBottom: 40, display: "grid", gap: 8 }}
       >
+        <p>
+          <Link className="vk-link" href="/developers">
+            Developers · API
+          </Link>
+        </p>
         <p>
           Built by Williams Balogun. The method comes from{" "}
           <a className="vk-link" href={ESSAY_URL} target="_blank" rel="noreferrer">
