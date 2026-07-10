@@ -1,18 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderWithProviders } from "@/test-utils/render";
 import { Analyzer } from "./Analyzer";
 
 describe("Analyzer (assembly)", () => {
   it("starts on the dropzone with no verdict shown", () => {
-    render(<Analyzer />);
+    renderWithProviders(<Analyzer />);
     expect(screen.getByLabelText("Upload a trade log CSV")).toBeInTheDocument();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("analyses the built-in sample end-to-end and shows NO ROBUST EDGE", async () => {
     const user = userEvent.setup();
-    render(<Analyzer />);
+    renderWithProviders(<Analyzer />);
 
     await user.click(screen.getByRole("button", { name: /try a sample log/i }));
 
@@ -23,7 +24,7 @@ describe("Analyzer (assembly)", () => {
 
   it("can return to the dropzone after a result", async () => {
     const user = userEvent.setup();
-    render(<Analyzer />);
+    renderWithProviders(<Analyzer />);
 
     await user.click(screen.getByRole("button", { name: /try a sample log/i }));
     await user.click(screen.getByRole("button", { name: /analyse another log/i }));
@@ -34,7 +35,7 @@ describe("Analyzer (assembly)", () => {
 
   it("shows a parser error for an unrecognised paste", async () => {
     const user = userEvent.setup();
-    render(<Analyzer />);
+    renderWithProviders(<Analyzer />);
 
     await user.click(screen.getByRole("button", { name: /paste csv instead/i }));
     await user.type(screen.getByLabelText("Paste trade log CSV"), "foo,bar\n1,2");
@@ -45,7 +46,7 @@ describe("Analyzer (assembly)", () => {
 
   it("analyses valid pasted CSV", async () => {
     const user = userEvent.setup();
-    render(<Analyzer />);
+    renderWithProviders(<Analyzer />);
 
     const csv = ["R", ...Array.from({ length: 60 }, (_, i) => (i % 3 === 0 ? "-1" : "0.9"))].join(
       "\n",

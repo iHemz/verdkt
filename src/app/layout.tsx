@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Hanken_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 
 const instrument = Instrument_Serif({
   variable: "--font-instrument-serif",
@@ -36,7 +37,9 @@ export default function RootLayout({
       lang="en"
       className={`${instrument.variable} ${hanken.variable} ${plexMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }

@@ -778,6 +778,11 @@ a {
   accent-color: var(--glow);
 }
 
+.vk-field-error {
+  color: var(--fail);
+  font-size: 12.5px;
+}
+
 /* ---------- report page ---------- */
 .vk-report-mark img {
   display: block;
