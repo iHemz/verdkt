@@ -48,3 +48,6 @@ next-env.d.ts
 # scaffolder agent files (not used)
 AGENTS.md
 CLAUDE.md
+
+# local report store (dev filesystem persistence)
+/.data

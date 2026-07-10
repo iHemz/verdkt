@@ -722,3 +722,125 @@ a {
   font-size: 13.5px;
   margin-top: 12px;
 }
+
+/* ---------- publish CTA + form ---------- */
+.vk-publish {
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  padding: clamp(18px, 3.5vw, 28px);
+  background: linear-gradient(180deg, var(--ink-850), var(--ink-900));
+}
+
+.vk-publish-form {
+  display: grid;
+  gap: 14px;
+}
+
+.vk-field {
+  display: grid;
+  gap: 6px;
+}
+
+.vk-field > span {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.vk-input {
+  background: var(--ink-900);
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  color: var(--bone);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  padding: 10px 12px;
+}
+
+.vk-input:focus {
+  outline: none;
+  border-color: var(--glow);
+}
+
+.vk-check-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  align-items: start;
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+.vk-check-row input {
+  margin-top: 3px;
+  accent-color: var(--glow);
+}
+
+/* ---------- report page ---------- */
+.vk-report-mark img {
+  display: block;
+}
+
+.vk-report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--mute);
+}
+
+.vk-report-disc {
+  color: var(--faint);
+}
+
+.vk-report-actions {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: clamp(18px, 3.5vw, 28px);
+  background: var(--ink-850);
+}
+
+.vk-report-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vk-report-embed-label {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 8px;
+}
+
+.vk-report-preview {
+  margin-bottom: 10px;
+}
+
+.vk-report-manage {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- print (Save as PDF) ---------- */
+@media print {
+  body::before {
+    display: none;
+  }
+  .vk-topbar,
+  .vk-foot,
+  .vk-report-noprint {
+    display: none !important;
+  }
+  .vk-verdict,
+  .vk-report-actions {
+    break-inside: avoid;
+  }
+}

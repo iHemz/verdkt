@@ -46,4 +46,21 @@ test.describe("Verdkt analyzer", () => {
     await page.getByRole("button", { name: /analyse pasted log/i }).click();
     await expect(page.getByText(/profit\/loss or R-multiple column/i)).toBeVisible();
   });
+
+  test("publishes a verified report (free mode) and lands on the public page", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /try a sample log/i }).click();
+    await page.getByRole("button", { name: /publish a verified report/i }).click();
+
+    await page.getByRole("textbox", { name: /strategy name/i }).fill("E2E Strategy");
+    await page.getByRole("checkbox").check();
+    await page.getByRole("button", { name: "Publish", exact: true }).click();
+
+    await page.waitForURL(/\/r\/[0-9a-z]+/);
+    await expect(page.getByRole("heading", { name: "E2E Strategy" })).toBeVisible();
+    await expect(page.getByText(/Method-verified on submitted data/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /copy embed code/i })).toBeVisible();
+    // the badge image resolves
+    await expect(page.locator('img[alt*="Verdkt Verified"]').first()).toBeVisible();
+  });
 });

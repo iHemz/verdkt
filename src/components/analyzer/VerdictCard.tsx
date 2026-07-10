@@ -1,21 +1,25 @@
-import type { Analysis } from "@/lib/analysis";
+import type { Analysis, Trade } from "@/lib/analysis";
 import { StatGrid } from "./StatGrid";
 import { EquityCurve } from "./EquityCurve";
 import { OutOfSampleSplit } from "./OutOfSampleSplit";
 import { CheckList } from "./CheckList";
 import { Attribution } from "./Attribution";
 import { CostStress } from "./CostStress";
+import { PublishReport } from "./PublishReport";
 
 type VerdictCardProps = {
   analysis: Analysis;
   warnings?: string[];
+  /** When provided (live analysis, not a published report), shows the publish CTA. */
+  trades?: Trade[];
 };
 
 /**
- * Fully presentational: renders an Analysis. No state, no data fetching — so it
- * is trivial to test and to reuse (e.g. a shareable read-only report page).
+ * Renders an Analysis. Presentational apart from the optional publish CTA, which
+ * only appears when `trades` are passed, so the public report page reuses this
+ * component as a pure read-only view.
  */
-export function VerdictCard({ analysis: a, warnings = [] }: VerdictCardProps) {
+export function VerdictCard({ analysis: a, warnings = [], trades }: VerdictCardProps) {
   return (
     <div style={{ display: "grid", gap: 20 }}>
       <section className="vk-verdict" aria-label="Edge verdict">
@@ -56,6 +60,8 @@ export function VerdictCard({ analysis: a, warnings = [] }: VerdictCardProps) {
           Note: {w}
         </p>
       ))}
+
+      {trades && trades.length > 0 && <PublishReport trades={trades} />}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Analyzer } from "./Analyzer";
 
@@ -51,7 +51,8 @@ describe("Analyzer (assembly)", () => {
       "\n",
     );
     await user.click(screen.getByRole("button", { name: /paste csv instead/i }));
-    await user.type(screen.getByLabelText("Paste trade log CSV"), csv);
+    // set the value in one shot (typing 60 lines char-by-char is needlessly slow)
+    fireEvent.change(screen.getByLabelText("Paste trade log CSV"), { target: { value: csv } });
     await user.click(screen.getByRole("button", { name: /analyse pasted log/i }));
 
     expect(screen.getByRole("status")).toHaveTextContent(/EDGE|PROMISING/);

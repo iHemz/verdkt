@@ -42,7 +42,11 @@ export function Analyzer() {
             Showing a built-in sample log. Drop your own to analyse it.
           </div>
         )}
-        <VerdictCard analysis={state.analysis} warnings={state.parse.warnings} />
+        <VerdictCard
+          analysis={state.analysis}
+          warnings={state.parse.warnings}
+          trades={state.parse.trades}
+        />
         <div>
           <Button onClick={() => setState({ kind: "idle" })}>← Analyse another log</Button>
         </div>
