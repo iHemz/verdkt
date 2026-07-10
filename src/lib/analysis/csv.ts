@@ -107,13 +107,23 @@ export function parseNumber(raw: string | undefined | null): number | null {
   return negative ? -n : n;
 }
 
-/** Parse a date cell into epoch ms, or undefined. Handles ISO and dd.mm.yyyy. */
+/** Parse a date cell into epoch ms, or undefined. Handles ISO, yyyy.mm.dd (MT5), and dd.mm.yyyy. */
 export function parseDate(raw: string | undefined | null): number | undefined {
   const s = (raw ?? "").trim();
   if (!s) return undefined;
 
+  // Native first, so proper ISO strings (with timezone) are honoured exactly.
   const t = Date.parse(s);
   if (Number.isFinite(t)) return t;
+
+  // yyyy.mm.dd with an optional hh:mm or hh:mm:ss time (MetaTrader exports),
+  // which Date.parse may reject. A 4-digit leading group is unambiguously the year.
+  const ymd = s.match(/^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (ymd) {
+    const [, y, mo, d, hh, mm, ss] = ymd;
+    const dt = new Date(Number(y), Number(mo) - 1, Number(d), Number(hh || 0), Number(mm || 0), Number(ss || 0));
+    if (Number.isFinite(dt.getTime())) return dt.getTime();
+  }
 
   const m = s.match(/^(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
   if (m) {

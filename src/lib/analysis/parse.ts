@@ -100,6 +100,53 @@ function findHeaderRow(rows: string[][]): number {
   return 0;
 }
 
+// Multi-section broker reports (MT5 "Trade History Report": Positions / Orders /
+// Deals / Results) reuse the same column positions across sections with
+// different meanings — e.g. the Deals "Balance" sits exactly where Positions has
+// "Profit". We must STOP at a section boundary, not read straight through it,
+// or account-balance numbers get ingested as trade P&L.
+const SECTION_WORDS = new Set([
+  "orders",
+  "deals",
+  "results",
+  "positions",
+  "workingorders",
+  "openpositions",
+  "closedpositions",
+  "summary",
+]);
+
+const HEADER_TOKENS = new Set<string>([
+  ...PNL_KEYS,
+  ...R_KEYS,
+  ...DATE_KEYS,
+  ...SYMBOL_KEYS,
+  ...SIDE_KEYS,
+  "balance",
+  "deal",
+  "order",
+  "state",
+  "commission",
+  "fee",
+  "swap",
+  "volume",
+  "price",
+  "direction",
+  "position",
+  "comment",
+  "ticket",
+]);
+
+/** True when a row starts a new section: a lone title cell, or a repeated header. */
+function isSectionBreak(normedRow: string[]): boolean {
+  const nonEmpty = normedRow.filter((c) => c !== "");
+  if (nonEmpty.length === 1 && SECTION_WORDS.has(nonEmpty[0])) return true;
+  // A repeated header row from a different section (schema change).
+  let hits = 0;
+  for (const c of normedRow) if (c && HEADER_TOKENS.has(c)) hits++;
+  return hits >= 4;
+}
+
 export function parseTradeLog(text: string): ParseResult {
   if (!text || !text.trim()) throw new ParseError("The file looks empty.");
 
@@ -131,6 +178,10 @@ export function parseTradeLog(text: string): ParseResult {
   let rowsSeen = 0;
 
   for (const row of dataRows) {
+    // Stop at the next section (Orders/Deals/Results) so we never read another
+    // section's columns (e.g. Balance) as trade P&L.
+    if (isSectionBreak(row.map(normalizeHeader))) break;
+
     rowsSeen++;
     const val = parseNumber(row[valueIdx]);
     // Skip rows with no numeric value here (TradingView entry rows, summary

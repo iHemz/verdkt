@@ -88,3 +88,53 @@ describe("parseTradeLog — attribution dimensions", () => {
     expect(res.columns.side).toBeUndefined();
   });
 });
+
+describe("parseTradeLog — multi-section MT5 report (regression)", () => {
+  // MetaTrader "Trade History Report": Positions -> Orders -> Deals -> Results.
+  // The Deals "Balance" column sits exactly where Positions has "Profit"; the
+  // parser must stop at the section boundary and never read balances as P&L.
+  const MT5 = `Trade History Report,,,,,,,,,,,,,,
+Account:,,,"123 (USD, Broker, demo)",,,,,,,,,,,
+Positions,,,,,,,,,,,,,,
+Time,Position,Symbol,Type,Volume,Price,S / L,T / P,Time,Price,Commission,Swap,Profit,,
+2026.01.01 10:00:00,111,XAUUSDm,sell,0.04,4 106.170,4 129.590,4 068.090,2026.01.01 10:15:00,4 101.093,0.00,0.00, 20.31,,
+2026.01.01 11:00:00,112,AUDUSDm,sell,0.5, 0.69156, 0.69356, 0.68756,2026.01.01 11:15:00, 0.69161,0.00,0.00,- 2.50,,
+2026.01.01 12:00:00,113,GBPCADm,buy,1, 1.87629, 1.87529, 1.87829,2026.01.01 12:15:00, 1.87529,0.00,0.00,- 70.25,,
+2026.01.01 13:00:00,114,USDCADm,buy,0.83, 1.42017, 1.41896, 1.42260,2026.01.01 13:30:00, 1.41896,0.00,0.00,- 70.78,,
+Orders,,,,,,,,,,,,,,
+Open Time,Order,Symbol,Type,Volume,Price,S / L,T / P,Time,State,,Comment,,,
+2026.01.01 10:00:00,111,XAUUSDm,sell,0.04 / 0.04,market,4 129.590,4 068.090,2026.01.01 10:00:00,filled,,GoldBot,,,
+2026.01.01 10:15:00,211,XAUUSDm,buy,0.04 / 0.04,market,,,2026.01.01 10:15:00,filled,,GoldBot close,,,
+Deals,,,,,,,,,,,,,,
+Time,Deal,Symbol,Type,Direction,Volume,Price,Order,Commission,Fee,Swap,Profit,Balance,Comment,
+2026.01.01 10:15:00,999,XAUUSDm,buy,out,0.04,4 101.093,111,0.00,0.00,0.00, 20.31,10 020.31,close,
+2026.01.01 11:15:00,998,AUDUSDm,buy,out,0.5, 0.69161,112,0.00,0.00,0.00,- 2.50,10 017.81,close,
+Results,,,,,,,,,,,,,,
+Total Net Profit:,,,- 123.22,Gross Profit:,,, 20.31,Gross Loss:,,,-143.53,,,`;
+
+  it("reads only the Positions section, not Deals balances", () => {
+    const res = parseTradeLog(MT5);
+    expect(res.columns.pnl).toBe("Profit");
+    expect(res.trades).toHaveLength(4); // 4 positions, NOT 6 (would include 2 deal-balance rows)
+    expect(res.trades.map((t) => t.pnl)).toEqual([20.31, -2.5, -70.25, -70.78]);
+  });
+
+  it("never ingests an account-balance number as a trade P&L", () => {
+    const res = parseTradeLog(MT5);
+    // balances were ~10,000; a real trade here is under ~100
+    expect(res.trades.every((t) => Math.abs(t.pnl) < 1000)).toBe(true);
+  });
+
+  it("still detects symbol and normalises MT5 direction", () => {
+    const res = parseTradeLog(MT5);
+    expect(res.trades[0].symbol).toBe("XAUUSDm");
+    expect(res.trades[0].side).toBe("Short"); // sell
+    expect(res.trades[2].side).toBe("Long"); // buy
+  });
+
+  it("orders MT5 yyyy.mm.dd timestamps chronologically", () => {
+    const res = parseTradeLog(MT5);
+    expect(res.trades[0].date).toBeLessThan(res.trades[3].date!);
+    expect(res.warnings).toHaveLength(0); // dates parsed, no fallback warning
+  });
+});
