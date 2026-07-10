@@ -15,11 +15,13 @@ Serverless filesystems are read-only/ephemeral, so a hosted key-value store is
 required. Until it's set, the publish endpoint returns a friendly "being set up"
 message instead of erroring.
 
-1. Vercel dashboard → your `verdkt` project → **Storage** → add **Upstash Redis**
-   (Marketplace, free tier is fine). Vercel injects the env vars automatically.
-2. Confirm these exist in Project → Settings → Environment Variables:
-   - `UPSTASH_REDIS_REST_URL`
-   - `UPSTASH_REDIS_REST_TOKEN`
+1. Vercel dashboard → your `verdkt` project → **Storage** → add a Redis store
+   (either **Upstash** from the Marketplace or **Redis – Official Redis for
+   Vercel**; free tier is fine). Vercel injects the env vars automatically.
+2. The code accepts either naming scheme, so whichever the integration created is
+   fine:
+   - Upstash: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
+   - Official Redis / KV: `KV_REST_API_URL` + `KV_REST_API_TOKEN`
 3. Redeploy (or push any commit). Publishing now persists.
 
 With storage set and no Stripe, **publishing is free** — a clean way to launch a

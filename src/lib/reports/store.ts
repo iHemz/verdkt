@@ -3,6 +3,7 @@
 // new adapter, not an app change.
 
 import type { NewReport, StoredReport } from "./types";
+import { hasDurableStore } from "./config";
 
 export interface ReportStore {
   /**
@@ -29,7 +30,7 @@ let cached: ReportStore | null = null;
  */
 export async function getStore(): Promise<ReportStore> {
   if (cached) return cached;
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  if (hasDurableStore()) {
     const { redisStore } = await import("./redisStore");
     cached = redisStore();
   } else {

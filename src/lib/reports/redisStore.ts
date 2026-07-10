@@ -6,6 +6,7 @@ import { Redis } from "@upstash/redis";
 import type { NewReport, ReportRecord, StoredReport } from "./types";
 import { newManageToken, newReportId } from "./id";
 import { sha256Hex, timingSafeEqual } from "./hash";
+import { redisCredentials } from "./config";
 import type { ReportStore } from "./store";
 
 const key = (id: string) => `report:${id}`;
@@ -22,7 +23,9 @@ function toPublic(rec: ReportRecord): StoredReport {
 }
 
 export function redisStore(): ReportStore {
-  const redis = Redis.fromEnv();
+  const creds = redisCredentials();
+  if (!creds) throw new Error("Redis is not configured.");
+  const redis = new Redis({ url: creds.url, token: creds.token });
 
   return {
     async create(input: NewReport, opts?: { paid?: boolean }) {

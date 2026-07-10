@@ -6,7 +6,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { analyze } from "@/lib/analysis";
 import { coerceTrades, getStore, sanitizeAuthor, sanitizeTitle } from "@/lib/reports";
-import { paymentEnabled } from "@/lib/reports/config";
+import { hasDurableStore, paymentEnabled } from "@/lib/reports/config";
 import { stripe } from "@/lib/payments/stripe";
 
 export const runtime = "nodejs";
@@ -19,11 +19,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
 
-  // On serverless (Vercel) the filesystem store isn't durable; require Upstash.
-  const durableStore = Boolean(
-    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN,
-  );
-  if (process.env.VERCEL && !durableStore) {
+  // On serverless (Vercel) the filesystem store isn't durable; require Redis.
+  if (process.env.VERCEL && !hasDurableStore()) {
     return NextResponse.json(
       { error: "Publishing is being set up and isn't available yet. Please check back soon." },
       { status: 503 },

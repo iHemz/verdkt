@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+const subscribe = () => () => {};
 
 /**
- * The current origin, resolved after mount so server and first client render
- * agree (avoids hydration mismatches when building absolute URLs).
+ * The current origin, via useSyncExternalStore so server and hydration render an
+ * empty string (matching SSR) and the client then reports window.location.origin.
+ * The idiomatic, hydration-safe way to read a browser value.
  */
 export function useOrigin(): string {
-  const [origin, setOrigin] = useState("");
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
-  return origin;
+  return useSyncExternalStore(
+    subscribe,
+    () => window.location.origin,
+    () => "",
+  );
 }
