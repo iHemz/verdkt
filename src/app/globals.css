@@ -980,3 +980,43 @@ a {
   font-size: 14px;
   margin-top: 8px;
 }
+
+/* ---------- deep diagnosis (market data + AI coach) ---------- */
+.vk-deep {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--line);
+}
+
+.vk-deep-pitch {
+  color: var(--mute);
+  font-size: 14px;
+  margin-bottom: 12px;
+  max-width: 60ch;
+}
+
+.vk-coach {
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 18px 20px;
+  background: var(--glow-soft);
+}
+
+.vk-coach-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--glow);
+  margin-bottom: 10px;
+}
+
+.vk-coach p {
+  color: var(--bone);
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+
+.vk-coach p + p {
+  margin-top: 10px;
+}

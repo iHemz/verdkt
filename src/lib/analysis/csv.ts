@@ -119,18 +119,20 @@ export function parseDate(raw: string | undefined | null): number | undefined {
   // yyyy.mm.dd with an optional hh:mm or hh:mm:ss time (MetaTrader exports),
   // which Date.parse may reject. A 4-digit leading group is unambiguously the year.
   const ymd = s.match(/^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  // Broker timestamps carry no zone; interpret as UTC so the result is
+  // deterministic (server-TZ independent) and aligns with UTC market candles.
   if (ymd) {
     const [, y, mo, d, hh, mm, ss] = ymd;
-    const dt = new Date(Number(y), Number(mo) - 1, Number(d), Number(hh || 0), Number(mm || 0), Number(ss || 0));
-    if (Number.isFinite(dt.getTime())) return dt.getTime();
+    const t2 = Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(hh || 0), Number(mm || 0), Number(ss || 0));
+    if (Number.isFinite(t2)) return t2;
   }
 
   const m = s.match(/^(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
   if (m) {
     const [, a, b, c, hh, mm] = m;
     const year = c.length === 2 ? 2000 + Number(c) : Number(c);
-    const d = new Date(year, Number(b) - 1, Number(a), Number(hh || 0), Number(mm || 0));
-    if (Number.isFinite(d.getTime())) return d.getTime();
+    const t2 = Date.UTC(year, Number(b) - 1, Number(a), Number(hh || 0), Number(mm || 0));
+    if (Number.isFinite(t2)) return t2;
   }
   return undefined;
 }

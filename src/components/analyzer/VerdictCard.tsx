@@ -53,7 +53,7 @@ export function VerdictCard({ analysis: a, warnings = [], trades }: VerdictCardP
 
         <Attribution dimensions={a.attribution} />
 
-        {diagnosis && <Diagnosis diagnosis={diagnosis} />}
+        {diagnosis && trades && <Diagnosis diagnosis={diagnosis} trades={trades} />}
       </section>
 
       {a.usingRProxy && (

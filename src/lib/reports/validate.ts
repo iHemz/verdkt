@@ -31,6 +31,13 @@ export function coerceTrades(input: unknown): Trade[] {
     if (Number.isFinite(Number(o.date))) trade.date = Number(o.date);
     if (typeof o.symbol === "string" && o.symbol.trim()) trade.symbol = o.symbol.trim().slice(0, 40);
     if (o.side === "Long" || o.side === "Short") trade.side = o.side;
+    // Rich broker-export fields (optional; power the deep diagnostics).
+    if (Number.isFinite(Number(o.entryPrice))) trade.entryPrice = Number(o.entryPrice);
+    if (Number.isFinite(Number(o.exitPrice))) trade.exitPrice = Number(o.exitPrice);
+    if (Number.isFinite(Number(o.stopLoss))) trade.stopLoss = Number(o.stopLoss);
+    if (Number.isFinite(Number(o.takeProfit))) trade.takeProfit = Number(o.takeProfit);
+    if (Number.isFinite(Number(o.volume))) trade.volume = Number(o.volume);
+    if (Number.isFinite(Number(o.closeTime))) trade.closeTime = Number(o.closeTime);
     out.push(trade);
   }
   return out;

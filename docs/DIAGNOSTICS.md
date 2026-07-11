@@ -84,6 +84,18 @@ Traders pay hundreds for courses, prop-firm evaluations, and mentors. "Here is y
 - **Overfitting the what-ifs.** Contained by the in-sample robustness guardrail.
 - **Willingness to pay still unproven.** Offer the deep diagnosis to the warm LinkedIn leads before building Tier B/C; a "found 3 leaks costing you 0.2R each, here's the fix" hook is far more compelling than a badge.
 
+## Status (built)
+
+- **Tier A** — shipped. Log-only leaks in `src/lib/diagnostics`.
+- **Tier B** — shipped. `src/lib/marketData` (symbol normalisation + Dukascopy fetch, merged narrow windows, Redis cache, retry + per-range timeout + overall deadline so the route always returns in time) feeds `src/lib/diagnostics/marketDiagnose.ts` (capture efficiency, stop-too-tight). Runs server-side via `POST /api/diagnose`.
+- **Tier C** — shipped. `src/lib/ai/coach.ts` (Claude `claude-opus-4-8`, grounded system prompt, narrates only the computed facts).
+
+### Deployment setup
+
+- **`ANTHROPIC_API_KEY`** (Vercel env) — required for the Tier C coaching note. Without it the deep diagnosis still runs the market checks and shows an honest "AI note not configured" line.
+- **Upstash Redis / Vercel KV** (already wired for reports) — also caches fetched candles for 30 days, so repeat deep diagnoses are instant. Optional; without it every run refetches.
+- Dukascopy needs no key. Coverage depends on the feed being reachable at request time; the route degrades to "couldn't match your symbols" rather than hanging.
+
 ## First slice to build
 
 Steps 1–2 (parser enrichment + the log-only diagnostics engine), because they need no external data, work today on the owner's own Exness export, and already deliver "here is what to fix." That output doubles as the paid teaser and the validation asset for outreach. Market data (steps 3–4) follows once the diagnosis clearly lands.
