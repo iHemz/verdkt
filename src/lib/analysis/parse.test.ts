@@ -137,4 +137,14 @@ Total Net Profit:,,,- 123.22,Gross Profit:,,, 20.31,Gross Loss:,,,-143.53,,,`;
     expect(res.trades[0].date).toBeLessThan(res.trades[3].date!);
     expect(res.warnings).toHaveLength(0); // dates parsed, no fallback warning
   });
+
+  it("extracts rich fields (prices, SL/TP, volume, close time)", () => {
+    const t = parseTradeLog(MT5).trades[0]; // earliest: XAUUSDm sell at 10:00
+    expect(t.entryPrice).toBeCloseTo(4106.17, 2);
+    expect(t.exitPrice).toBeCloseTo(4101.093, 3);
+    expect(t.stopLoss).toBeCloseTo(4129.59, 2);
+    expect(t.takeProfit).toBeCloseTo(4068.09, 2);
+    expect(t.volume).toBeCloseTo(0.04, 3);
+    expect(t.closeTime).toBeGreaterThan(t.date!);
+  });
 });

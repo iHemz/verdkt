@@ -75,6 +75,14 @@ function normalizeSide(raw: string | undefined): string | undefined {
   return undefined;
 }
 
+// Rich broker-export columns (MT5, cTrader). Prices/times often appear twice
+// (open + close) with identical headers, so these are matched positionally.
+const PRICE_KEYS = ["price", "openprice", "entryprice", "closeprice", "exitprice", "fillprice", "rate"];
+const TIME_KEYS = ["time", "date", "datetime"];
+const SL_KEYS = ["sl", "stoploss", "stop"];
+const TP_KEYS = ["tp", "takeprofit", "target"];
+const VOLUME_KEYS = ["volume", "lots", "lot", "size", "qty", "quantity", "units", "vol"];
+
 function pickColumn(normedHeaders: string[], keys: string[], exactOnly = false): number {
   for (const key of keys) {
     const idx = normedHeaders.indexOf(key);
@@ -86,6 +94,15 @@ function pickColumn(normedHeaders: string[], keys: string[], exactOnly = false):
     if (idx !== -1) return idx;
   }
   return -1;
+}
+
+/** Every column index whose header matches any key (exact or substring), in order. */
+function pickColumns(normedHeaders: string[], keys: string[]): number[] {
+  const out: number[] = [];
+  normedHeaders.forEach((h, i) => {
+    if (h && (keys.includes(h) || keys.some((k) => h.includes(k)))) out.push(i);
+  });
+  return out;
 }
 
 /** Find the header row, skipping any title/blank preamble some exports include. */
@@ -167,6 +184,17 @@ export function parseTradeLog(text: string): ParseResult {
   const symbolIdx = pickColumn(normed, SYMBOL_KEYS);
   const sideIdx = pickColumn(normed, SIDE_KEYS);
 
+  // Rich fields: entry/exit prices and open/close times duplicate their headers,
+  // so take them positionally (first = entry/open, last = exit/close).
+  const priceCols = pickColumns(normed, PRICE_KEYS);
+  const timeCols = pickColumns(normed, TIME_KEYS);
+  const entryIdx = priceCols.length > 0 ? priceCols[0] : -1;
+  const exitIdx = priceCols.length > 1 ? priceCols[priceCols.length - 1] : -1;
+  const closeTimeIdx = timeCols.length > 1 ? timeCols[timeCols.length - 1] : -1;
+  const slIdx = pickColumn(normed, SL_KEYS);
+  const tpIdx = pickColumn(normed, TP_KEYS);
+  const volumeIdx = pickColumn(normed, VOLUME_KEYS);
+
   if (pnlIdx === -1 && rIdx === -1) {
     throw new ParseError(
       'Couldn\'t find a profit/loss or R-multiple column. Expected a header like "Profit", "P&L", "Net P/L", or "R".',
@@ -210,6 +238,31 @@ export function parseTradeLog(text: string): ParseResult {
     if (sideIdx !== -1) {
       const side = normalizeSide(row[sideIdx]);
       if (side) trade.side = side;
+    }
+
+    if (entryIdx !== -1) {
+      const v = parseNumber(row[entryIdx]);
+      if (v !== null) trade.entryPrice = v;
+    }
+    if (exitIdx !== -1) {
+      const v = parseNumber(row[exitIdx]);
+      if (v !== null) trade.exitPrice = v;
+    }
+    if (slIdx !== -1) {
+      const v = parseNumber(row[slIdx]);
+      if (v !== null && v !== 0) trade.stopLoss = v; // 0 = no stop set
+    }
+    if (tpIdx !== -1) {
+      const v = parseNumber(row[tpIdx]);
+      if (v !== null && v !== 0) trade.takeProfit = v; // 0 = no target set
+    }
+    if (volumeIdx !== -1) {
+      const v = parseNumber(row[volumeIdx]);
+      if (v !== null) trade.volume = v;
+    }
+    if (closeTimeIdx !== -1) {
+      const d = parseDate(row[closeTimeIdx]);
+      if (d !== undefined) trade.closeTime = d;
     }
 
     trades.push(trade);

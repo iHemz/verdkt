@@ -901,3 +901,82 @@ a {
   border-radius: 5px;
   padding: 1px 5px;
 }
+
+/* ---------- diagnostics (what to fix) ---------- */
+.vk-diagnosis {
+  padding: clamp(20px, 4vw, 36px);
+  border-top: 1px solid var(--line);
+}
+
+.vk-leaks {
+  display: grid;
+  gap: 14px;
+}
+
+.vk-leak {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  background: var(--ink-900);
+}
+
+.vk-leak-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vk-leak-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  color: var(--faint);
+}
+
+.vk-leak-tag[data-sev="bad"] {
+  color: var(--fail);
+  border-color: var(--fail-soft);
+  background: var(--fail-soft);
+}
+.vk-leak-tag[data-sev="warn"] {
+  color: var(--warn);
+  border-color: var(--warn-soft);
+  background: var(--warn-soft);
+}
+.vk-leak-tag[data-sev="good"] {
+  color: var(--pass);
+  border-color: var(--pass-soft);
+  background: var(--pass-soft);
+}
+
+.vk-leak-title {
+  font-weight: 560;
+  font-size: 15px;
+}
+
+.vk-leak-impact {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--glow);
+  background: var(--glow-soft);
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+.vk-leak-detail {
+  color: var(--mute);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.vk-leak-fix {
+  color: var(--bone-dim);
+  font-size: 14px;
+  margin-top: 8px;
+}

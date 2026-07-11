@@ -7,12 +7,27 @@ export type Trade = {
   pnl: number;
   /** R-multiple, when the log provides an explicit R column. */
   r?: number;
-  /** Epoch milliseconds, when a date/time column is present. */
+  /** Epoch milliseconds of the open, when a date/time column is present. Used for ordering. */
   date?: number;
   /** Instrument/symbol, when the log has one. Used for edge attribution. */
   symbol?: string;
   /** Trade direction, normalised to "Long" | "Short" when derivable. */
   side?: string;
+
+  // Rich fields from full broker exports (MT5, cTrader). Optional; power the
+  // diagnostics engine. Absent on bare P&L logs, which degrade gracefully.
+  /** Entry/open price. */
+  entryPrice?: number;
+  /** Exit/close price. */
+  exitPrice?: number;
+  /** Stop-loss price as set on the order. */
+  stopLoss?: number;
+  /** Take-profit price as set on the order. */
+  takeProfit?: number;
+  /** Position size / volume (lots). */
+  volume?: number;
+  /** Epoch milliseconds of the close, for hold-time diagnostics. */
+  closeTime?: number;
 };
 
 export type DetectedColumns = {

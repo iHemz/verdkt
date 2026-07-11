@@ -1,10 +1,12 @@
 import type { Analysis, Trade } from "@/lib/analysis";
+import { diagnose } from "@/lib/diagnostics";
 import { StatGrid } from "./StatGrid";
 import { EquityCurve } from "./EquityCurve";
 import { OutOfSampleSplit } from "./OutOfSampleSplit";
 import { CheckList } from "./CheckList";
 import { Attribution } from "./Attribution";
 import { CostStress } from "./CostStress";
+import { Diagnosis } from "./Diagnosis";
 import { PublishReport } from "./PublishReport";
 
 type VerdictCardProps = {
@@ -20,6 +22,9 @@ type VerdictCardProps = {
  * component as a pure read-only view.
  */
 export function VerdictCard({ analysis: a, warnings = [], trades }: VerdictCardProps) {
+  // The diagnostics need the raw trades, so they only appear on live analysis.
+  const diagnosis = trades && trades.length > 0 ? diagnose(trades, a) : null;
+
   return (
     <div style={{ display: "grid", gap: 20 }}>
       <section className="vk-verdict" aria-label="Edge verdict">
@@ -47,6 +52,8 @@ export function VerdictCard({ analysis: a, warnings = [], trades }: VerdictCardP
         <CostStress rSeries={a.rSeries} baseExpectancyR={a.expectancyR} />
 
         <Attribution dimensions={a.attribution} />
+
+        {diagnosis && <Diagnosis diagnosis={diagnosis} />}
       </section>
 
       {a.usingRProxy && (
