@@ -6,6 +6,9 @@ Most backtests report a single number: total profit, win rate, a smooth equity c
 
 The whole thing runs in the browser. Your trades are parsed and analysed on your device and never leave it.
 
+> **Plays:** the product, career, and audience playbooks live in [`PLAYS.md`](PLAYS.md).
+> In a Claude Code session here, run `/play product` (or `career` / `audience`).
+
 ## What it checks
 
 1. **Expectancy in R.** Average risk-adjusted result per trade, not total profit. A high win rate with fat losers gets caught here.
