@@ -51,3 +51,7 @@ CLAUDE.md
 
 # local report store (dev filesystem persistence)
 /.data
+
+# Personal playbooks (kept local, not in the public repo)
+PLAYS.md
+.claude/commands/play.md
